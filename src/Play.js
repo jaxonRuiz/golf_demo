@@ -54,7 +54,24 @@ class Play extends Phaser.Scene {
         // wall goes inbetween borders (+- wallA.width/2 to adjust for wall size to avoid wall hanging off side)
         wallB.setImmovable(true);
 
+        // adding trackers
+        this.reusedConfig = {
+            fontFamily: 'Courier',
+            fontSize: '20px',
+            backgroundColor: '#F3B141',
+            color: '#843605',
+            align: 'right',
+            padding: {
+                top: 5,
+                bottom: 5,
+            },
+            fixedWidth: 150
+        }
+        this.shotsText = this.add.text(0,0, "shots: " + this.shotCounter.toString(), this.reusedConfig);
+        this.scoreText = this.add.text(width/2,0, "points: " + this.points.toString(), this.reusedConfig);
+        this.ratioText = this.add.text(width*(3/4),0, "rate: " + (this.points).toString()+"%", this.reusedConfig);
 
+        
         // adding walls to a group <- useful !!
         this.walls = this.add.group([wallA, wallB]);
 
@@ -73,6 +90,8 @@ class Play extends Phaser.Scene {
             // body of callback function
             // note that 'let' makes shotDirection local ONLY to this function
             this.shotCounter++;
+            this.shotsText.text = "shots: " + this.shotCounter.toString();
+            this.ratioText.text = "rate: " + (this.points/this.shotCounter).toString() + "%";
             let shotDirection_y = pointer.y <= this.ball.y ? 1 : -1;
             let shotDirection_x = pointer.x <= this.ball.x ? 1 : -1;
             // ^ ternary operations. format is: (condition) ? (if true) : (if false)
@@ -87,6 +106,8 @@ class Play extends Phaser.Scene {
         this.physics.add.collider(this.ball, this.cup, (ball, cup) => {
             ball.destroy();
             this.points++;
+            this.scoreText.text = "score: " + this.points.toString();
+            this.ratioText.text = "rate: " + (this.points/this.shotCounter).toString() + "%";
             console.log("ball hit hole");
             this.resetBall();
         }) 
