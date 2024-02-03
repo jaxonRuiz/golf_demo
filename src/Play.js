@@ -14,6 +14,9 @@ class Play extends Phaser.Scene {
         this.SHOT_VELOCITY_Y_MIN = 700;
         this.SHOT_VELOCITY_Y_MAX = 1100;
 
+        this.START_X = width/2;
+        this.START_Y = height*0.9;
+
     }
 
     preload() {
@@ -41,7 +44,12 @@ class Play extends Phaser.Scene {
         // you can tell which code i wrote by the semicolons LOL. 
         // too much C coding is bad for the brain :(
         
-        this.resetBall();
+        // add ball (initial)
+        this.ball = this.physics.add.sprite(this.START_X, this.START_Y, "ball");
+        this.ball.body.setCircle(this.ball.width/2); // sets circle based on radius of ball
+        this.ball.body.setCollideWorldBounds(true); // makes ball locked to screen
+        this.ball.body.setBounce(0.5); // making bouncy. param is a 0-1 float. half bouncy rn
+        this.ball.body.setDamping(true).setDrag(0.5); // friction i think
 
         // add walls
         let wallA = this.physics.add.sprite(0, height/4, 'wall');
@@ -58,18 +66,18 @@ class Play extends Phaser.Scene {
         this.reusedConfig = {
             fontFamily: 'Courier',
             fontSize: '20px',
-            backgroundColor: '#F3B141',
-            color: '#843605',
-            align: 'right',
+            backgroundColor: '#FFFFFF',
+            color: '#000000',
+            align: 'left',
             padding: {
                 top: 5,
                 bottom: 5,
             },
-            fixedWidth: 150
+            fixedWidth: 140
         }
         this.shotsText = this.add.text(0,0, "shots: " + this.shotCounter.toString(), this.reusedConfig);
-        this.scoreText = this.add.text(width/2,0, "points: " + this.points.toString(), this.reusedConfig);
-        this.ratioText = this.add.text(width*(3/4),0, "rate: " + (this.points).toString()+"%", this.reusedConfig);
+        this.scoreText = this.add.text(0,this.shotsText.height, "points: " + this.points.toString(), this.reusedConfig);
+        this.ratioText = this.add.text(0,this.scoreText.height*2, "rate: 0.00%", this.reusedConfig);
 
         
         // adding walls to a group <- useful !!
@@ -91,7 +99,7 @@ class Play extends Phaser.Scene {
             // note that 'let' makes shotDirection local ONLY to this function
             this.shotCounter++;
             this.shotsText.text = "shots: " + this.shotCounter.toString();
-            this.ratioText.text = "rate: " + (this.points/this.shotCounter).toString() + "%";
+            this.ratioText.text = "rate: " + Math.floor(this.points/this.shotCounter*100).toString() + "%";
             let shotDirection_y = pointer.y <= this.ball.y ? 1 : -1;
             let shotDirection_x = pointer.x <= this.ball.x ? 1 : -1;
             // ^ ternary operations. format is: (condition) ? (if true) : (if false)
@@ -104,10 +112,10 @@ class Play extends Phaser.Scene {
         // cup/ball collision
         // v want to make collision interaction between ball and cup
         this.physics.add.collider(this.ball, this.cup, (ball, cup) => {
-            ball.destroy();
+            // ball.destroy();
             this.points++;
             this.scoreText.text = "score: " + this.points.toString();
-            this.ratioText.text = "rate: " + (this.points/this.shotCounter).toString() + "%";
+            this.ratioText.text = "rate: " + Math.floor(this.points/this.shotCounter*100).toString() + "%";
             console.log("ball hit hole");
             this.resetBall();
         }) 
@@ -123,11 +131,8 @@ class Play extends Phaser.Scene {
     }
     resetBall() {
         // add ball
-        this.ball = this.physics.add.sprite(width/2, height-height/10, "ball");
-        this.ball.body.setCircle(this.ball.width/2); // sets circle based on radius of ball
-        this.ball.body.setCollideWorldBounds(true); // makes ball locked to screen
-        this.ball.body.setBounce(0.5); // making bouncy. param is a 0-1 float. half bouncy rn
-        this.ball.body.setDamping(true).setDrag(0.5); // friction i think
+        this.ball.x = this.START_X;
+        this.ball.y = this.START_Y;
     }
 
 }
